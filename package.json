@@ -1,0 +1,40 @@
+{
+  "name": "html-gulp-boilerplate",
+  "version": "0.0.1",
+  "description": "A workflow boilerplate for modern front end development using Gulp.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jesse-s/html-gulp-boilerplate"
+  },
+  "private": true,
+  "main": "dist/index.html",
+  "readmeFilename": "README.md",
+  "scripts": {
+    "start": "gulp",
+    "postinstall": "gulp dist",
+    "build": "gulp build"
+  },
+  "author": "Jesse Smit",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "babel-preset-es2015": "^6.3.13",
+    "gulp-babel": "^6.1.2",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-sass": "^2.2.0",
+    "gulp-notify": "^2.2.0",
+    "gulp-load-plugins": "^1.2.0",
+    "gulp-connect": "^2.3.1",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-imagemin": "^2.4.0",
+    "gulp-nunjucks": "^2.1.1",
+    "gulp-watch": "^4.3.5",
+    "es6-promise": "^3.0.2",
+    "del": "^2.2.0",
+    "gulp-if": "^2.0.0",
+    "gulp-browserify": "^0.5.1"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  }
+}
