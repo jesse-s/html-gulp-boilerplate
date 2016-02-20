@@ -159,10 +159,18 @@ gulp.task('copy-js', function() {
 gulp.task('optimize-images', function() {
   gulp.src(config.imgSrc + '/**/*.*')
     .pipe($.imagemin({
-        optimizationLevel: (config.production ? 6 : 5),
+        optimizationLevel: 5,
         progressive: true,
         interlaced: true,
         multipass: true,
+        svgoPlugins: [
+          { removeViewBox: false },
+          { cleanupIDs: false },
+          { removeUselessStrokeAndFill: false },
+          { removeEmptyAttrs: false },
+          { collapseGroups: false },
+          { moveElemsAttrsToGroup: false }
+        ]
     }).on('error', handleError))
     .pipe(gulp.dest(config.imgDist))
     .pipe($.connect.reload());
