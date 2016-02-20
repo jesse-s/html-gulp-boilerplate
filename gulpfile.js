@@ -26,11 +26,12 @@ var config = {
 };
 
 /**
- * Global error handler. Don't crash on error, but show nofication
+ * Global error handler for the Plumber plugin
  */
 
-var handleError = function(err) {
-  return $.notify().write(err);
+var errorHandler = function(err) {
+  $.notify().write(err);
+  this.emit('end');
 };
 
 /**
@@ -81,7 +82,8 @@ gulp.task('watch', function() {
 
 gulp.task('compile-html', function() {
   gulp.src([config.htmlSrc + '/*.html'])
-    .pipe($.nunjucks.compile().on('error', handleError))
+    .pipe($.plumber(errorHandler))
+    .pipe($.nunjucks.compile())
     .pipe(gulp.dest(config.htmlDist))
     .pipe($.connect.reload());
 });
@@ -112,9 +114,10 @@ gulp.task('move-stuff', function() {
 
 gulp.task('compile-css', function() {
   gulp.src(config.cssSrc + '/app.scss')
+    .pipe($.plumber(errorHandler))
     .pipe(gulpif(! config.production, $.sourcemaps.init()))
-    .pipe($.sass().on('error', handleError))
-    .pipe($.autoprefixer(config.autoprefix).on('error', handleError))
+    .pipe($.sass())
+    .pipe($.autoprefixer(config.autoprefix))
     .pipe(gulpif(! config.production, $.sourcemaps.write()))
     .pipe(gulp.dest(config.cssDist))
     .pipe($.connect.reload());
@@ -127,15 +130,16 @@ gulp.task('compile-css', function() {
 gulp.task('compile-js', function() {
   //gulp.src(config.jsSrc + '/app.js')
   gulp.src([config.jsSrc + '/**/*.js', '!' + config.jsSrc + '/vendor/**/*'])
+    .pipe($.plumber(errorHandler))
     .pipe(gulpif(! config.production, $.sourcemaps.init()))
     .pipe($.babel({
       presets: ['es2015']
-    }).on('error', handleError))
+    }))
     .pipe($.browserify({
       insertGlobals: false,
       debug: true,
       paths: ['./node_modules', config.jsSrc]
-    }).on('error', handleError))
+    }))
     .pipe(gulpif(! config.production, $.sourcemaps.write()))
     .pipe(gulp.dest(config.jsDist))
     .pipe($.connect.reload());
@@ -158,6 +162,7 @@ gulp.task('copy-js', function() {
 
 gulp.task('optimize-images', function() {
   gulp.src(config.imgSrc + '/**/*.*')
+    .pipe($.plumber(errorHandler))
     .pipe($.imagemin({
         optimizationLevel: 5,
         progressive: true,
@@ -170,8 +175,8 @@ gulp.task('optimize-images', function() {
           { removeEmptyAttrs: false },
           { collapseGroups: false },
           { moveElemsAttrsToGroup: false }
-        ]
-    }).on('error', handleError))
+        ],
+    }))
     .pipe(gulp.dest(config.imgDist))
     .pipe($.connect.reload());
 });
