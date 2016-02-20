@@ -3,9 +3,9 @@ require('es6-promise').polyfill();
 
 var gulp = require('gulp');
 var gulpif = require('gulp-if');
-var del = require('del');
 var fs = require('fs');
 var $ = require('gulp-load-plugins')();
+var runSequence = require('run-sequence'); // Remove if Gulp 4.0 is released
 
 /**
  * Gulp tasks config
@@ -30,7 +30,7 @@ var config = {
  */
 
 var errorHandler = function(err) {
-  $.notify().write(err);
+  $.notify().write(err.toString());
   this.emit('end');
 };
 
@@ -81,7 +81,7 @@ gulp.task('watch', function() {
  */
 
 gulp.task('compile-html', function() {
-  gulp.src([config.htmlSrc + '/*.html'])
+  return gulp.src([config.htmlSrc + '/*.html'])
     .pipe($.plumber(errorHandler))
     .pipe($.nunjucks.compile())
     .pipe(gulp.dest(config.htmlDist))
@@ -90,10 +90,10 @@ gulp.task('compile-html', function() {
 
 /**
  * Copy all new folders in /src and files in the html folder that are not HTML
+ * Todo: clean up this task and return a stream
  */
 
 gulp.task('move-stuff', function() {
-  // Might have to clean this up..
   gulp.src([
     './src/**/*',
     '!' + config.htmlSrc, '!' + config.htmlSrc + '/**/*',
@@ -101,10 +101,12 @@ gulp.task('move-stuff', function() {
     '!' + config.jsSrc, '!' + config.jsSrc + '/**/*',
     '!' + config.imgSrc, '!' + config.imgSrc + '/**/*'
   ])
+  .pipe($.plumber(errorHandler))
   .pipe(gulp.dest('./dist'));
 
   // Non-HTML files in the HTML src folder
   gulp.src([config.htmlSrc + '/*.*', '!' + config.htmlSrc + '/*.html'])
+    .pipe($.plumber(errorHandler))
     .pipe(gulp.dest(config.htmlDist));
 });
 
@@ -113,12 +115,13 @@ gulp.task('move-stuff', function() {
  */
 
 gulp.task('compile-css', function() {
-  gulp.src(config.cssSrc + '/app.scss')
+  return gulp.src(config.cssSrc + '/app.scss')
     .pipe($.plumber(errorHandler))
     .pipe(gulpif(! config.production, $.sourcemaps.init()))
     .pipe($.sass())
     .pipe($.autoprefixer(config.autoprefix))
     .pipe(gulpif(! config.production, $.sourcemaps.write()))
+    .pipe(gulpif(config.production, $.cssnano()))
     .pipe(gulp.dest(config.cssDist))
     .pipe($.connect.reload());
 });
@@ -128,8 +131,10 @@ gulp.task('compile-css', function() {
  */
 
 gulp.task('compile-js', function() {
+  gulp.start('copy-js');
+
   //gulp.src(config.jsSrc + '/app.js')
-  gulp.src([config.jsSrc + '/**/*.js', '!' + config.jsSrc + '/vendor/**/*'])
+  return gulp.src([config.jsSrc + '/**/*.js', '!' + config.jsSrc + '/vendor/**/*'])
     .pipe($.plumber(errorHandler))
     .pipe(gulpif(! config.production, $.sourcemaps.init()))
     .pipe($.babel({
@@ -141,10 +146,9 @@ gulp.task('compile-js', function() {
       paths: ['./node_modules', config.jsSrc]
     }))
     .pipe(gulpif(! config.production, $.sourcemaps.write()))
+    .pipe(gulpif(config.production, $.uglify()))
     .pipe(gulp.dest(config.jsDist))
     .pipe($.connect.reload());
-
-  gulp.start('copy-js');
 });
 
 /**
@@ -152,7 +156,8 @@ gulp.task('compile-js', function() {
  */
 
 gulp.task('copy-js', function() {
-  gulp.src(config.jsSrc + '/vendor/**/*')
+  return gulp.src(config.jsSrc + '/vendor/**/*')
+    .pipe($.plumber(errorHandler))
     .pipe(gulp.dest(config.jsDist + '/vendor'));
 });
 
@@ -161,7 +166,7 @@ gulp.task('copy-js', function() {
  */
 
 gulp.task('optimize-images', function() {
-  gulp.src(config.imgSrc + '/**/*.*')
+  return gulp.src(config.imgSrc + '/**/*.*')
     .pipe($.plumber(errorHandler))
     .pipe($.imagemin({
         optimizationLevel: 5,
@@ -186,7 +191,9 @@ gulp.task('optimize-images', function() {
  */
 
 gulp.task('clean', function() {
-  del('./dist/**/*');
+  return gulp.src('./dist/*', { read: false })
+    .pipe($.plumber(errorHandler))
+		.pipe($.clean());
 });
 
 /**
@@ -212,8 +219,12 @@ gulp.task('checkinstall', function() {
  * Compile and move all the stuff to dist
  */
 
-gulp.task('dist', ['clean', 'compile-html', 'move-stuff', 'compile-css',
-  'compile-js', 'optimize-images']);
+gulp.task('dist', function(callback) {
+  runSequence(
+    'clean', ['compile-html', 'move-stuff', 'compile-css', 'compile-js'],
+    'optimize-images', callback
+  );
+});
 
 /**
  * Default Gulp task is starting the webserver, livereload and watch
