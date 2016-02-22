@@ -30,7 +30,7 @@ var config = {
  */
 
 var errorHandler = function(err) {
-  $.notify().write(err.toString());
+  $.notify().write(err);
   this.emit('end');
 };
 
