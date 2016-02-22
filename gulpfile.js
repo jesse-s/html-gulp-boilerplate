@@ -48,31 +48,23 @@ gulp.task('server', function () {
 });
 
 /**
- * Watch them files and fire up them tasks, yo
+ * Watch all project files and execute the relevant tasks
  */
 
 gulp.task('watch', function() {
-  $.watch([config.htmlSrc + '/**/*.html'], function() {
+  $.watch(config.htmlSrc + '/**/*.*', function() {
     gulp.start('compile-html');
   });
 
-  $.watch([
-    './src/**/*',
-    config.htmlSrc + '/*.*',
-    '!' + config.htmlSrc + '/*.html'
-  ], function() {
-      gulp.start('move-stuff');
-  });
-
-  $.watch([config.cssSrc + '/**/*.scss'], function() {
+  $.watch(config.cssSrc + '/**/*.scss', function() {
     gulp.start('compile-css');
   });
 
-  $.watch([config.jsSrc + '/**/*.js'], function() {
+  $.watch(config.jsSrc + '/**/*.js', function() {
     gulp.start('compile-js');
   });
 
-  $.watch([config.imgSrc + '/**/*.*'], function() {
+  $.watch(config.imgSrc + '/**/*.*', function() {
     gulp.start('optimize-images');
   });
 });
@@ -82,33 +74,11 @@ gulp.task('watch', function() {
  */
 
 gulp.task('compile-html', function() {
-  return gulp.src([config.htmlSrc + '/*.html'])
+  return gulp.src(config.htmlSrc + '/*.*')
     .pipe($.plumber(errorHandler))
     .pipe($.nunjucks.compile())
     .pipe(gulp.dest(config.htmlDist))
     .pipe($.connect.reload());
-});
-
-/**
- * Copy all new folders in /src and files in the html folder that are not HTML
- * Todo: clean up this task and return a stream
- */
-
-gulp.task('move-stuff', function() {
-  gulp.src([
-    './src/**/*',
-    '!' + config.htmlSrc, '!' + config.htmlSrc + '/**/*',
-    '!' + config.cssSrc, '!' + config.cssSrc + '/**/*',
-    '!' + config.jsSrc, '!' + config.jsSrc + '/**/*',
-    '!' + config.imgSrc, '!' + config.imgSrc + '/**/*'
-  ])
-  .pipe($.plumber(errorHandler))
-  .pipe(gulp.dest('./dist'));
-
-  // Non-HTML files in the HTML src folder
-  gulp.src([config.htmlSrc + '/*.*', '!' + config.htmlSrc + '/*.html'])
-    .pipe($.plumber(errorHandler))
-    .pipe(gulp.dest(config.htmlDist));
 });
 
 /**
@@ -132,8 +102,6 @@ gulp.task('compile-css', function() {
  */
 
 gulp.task('compile-js', function() {
-  gulp.start('copy-js');
-
   //gulp.src(config.jsSrc + '/app.js')
   return gulp.src([config.jsSrc + '/**/*.js', '!' + config.jsSrc + '/vendor/**/*'])
     .pipe($.plumber(errorHandler))
@@ -181,7 +149,7 @@ gulp.task('optimize-images', function() {
           { removeEmptyAttrs: false },
           { collapseGroups: false },
           { moveElemsAttrsToGroup: false }
-        ],
+        ]
     }))
     .pipe(gulp.dest(config.imgDist))
     .pipe($.connect.reload());
@@ -203,7 +171,8 @@ gulp.task('clean', function() {
 
 gulp.task('prod', function() {
   config.production = true;
-  gulp.start('dist');
+
+  return gulp.start('dist');
 });
 
 /**
@@ -212,7 +181,7 @@ gulp.task('prod', function() {
 
 gulp.task('checkinstall', function() {
   if (! fs.existsSync(config.cssDist)) {
-    gulp.start('dist');
+    return gulp.start('dist');
   }
 });
 
@@ -221,9 +190,10 @@ gulp.task('checkinstall', function() {
  */
 
 gulp.task('dist', function(callback) {
+  // Run tasks in parallel
   runSequence(
-    'clean', ['compile-html', 'move-stuff', 'compile-css', 'compile-js'],
-    'optimize-images', callback
+    'clean', ['compile-html', 'compile-css', 'copy-js', 'compile-js',
+    'optimize-images'], callback
   );
 });
 
