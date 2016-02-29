@@ -12,7 +12,7 @@
   "scripts": {
     "start": "gulp",
     "postinstall": "gulp dist",
-    "build": "gulp build"
+    "build": "gulp prod"
   },
   "author": "Jesse Smit",
   "license": "MIT",
