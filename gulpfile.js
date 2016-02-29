@@ -64,6 +64,10 @@ gulp.task('watch', function() {
     gulp.start('compile-js');
   });
 
+  $.watch(config.jsSrc + '/vendor/**/*', function() {
+    gulp.start('copy-js');
+  });
+
   $.watch(config.imgSrc + '/**/*.*', function() {
     gulp.start('optimize-images');
   });
