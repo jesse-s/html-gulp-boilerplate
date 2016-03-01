@@ -2,11 +2,19 @@
 require('es6-promise').polyfill();
 
 var gulp = require('gulp');
-var gulpif = require('gulp-if');
-var fs = require('fs');
 var $ = require('gulp-load-plugins')();
+var gulpif = require('gulp-if');
 var runSequence = require('run-sequence'); // Remove if Gulp 4.0 is released
+var fs = require('fs');
+var glob = require('glob');
+var merge = require('merge');
 var nunjucks = require('gulp-nunjucks-html');
+
+var browserify = require('browserify');
+var watchify = require('watchify');
+var babelify = require('babelify');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
 
 /**
  * Gulp tasks config
@@ -23,8 +31,25 @@ var config = {
   jsSrc: './src/js',
   jsDist: './dist/js',
   imgSrc: './src/images',
-  imgDist: './dist/images'
+  imgDist: './dist/images',
 };
+
+/**
+ * Bundler init
+ */
+
+var bundler = browserify({
+  entries: [config.jsSrc + '/app.js'],
+  insertGlobals: true,
+  debug: ! config.production,
+  paths: ['./node_modules', config.jsSrc], //config.jsDist
+  cache: {},
+  packageCache: {},
+  plugin: [watchify]
+})
+.transform(babelify, {
+  presets: ['es2015']
+});
 
 /**
  * Global error handler for the Plumber plugin
@@ -61,13 +86,18 @@ gulp.task('watch', function() {
     gulp.start('compile-css');
   });
 
-  $.watch(config.jsSrc + '/**/*.js', function() {
-    gulp.start('compile-js');
-  });
-
   $.watch(config.jsSrc + '/vendor/**/*', function() {
     gulp.start('copy-js');
   });
+
+  //$.watch(config.jsSrc + '/app.js', function() {
+  //  gulp.start('compile-js');
+  //});
+  bundler.on('update', function() {
+    gulp.start('compile-js');
+  });
+  // Start initial compilation or Watchify will not work
+  gulp.start('compile-js');
 
   $.watch(config.imgSrc + '/**/*.*', function() {
     gulp.start('optimize-images');
@@ -103,36 +133,35 @@ gulp.task('compile-css', function() {
 });
 
 /**
- * Babel ES2015
- */
-
-gulp.task('compile-js', function() {
-  //gulp.src(config.jsSrc + '/app.js')
-  return gulp.src([config.jsSrc + '/**/*.js', '!' + config.jsSrc + '/vendor/**/*'])
-    .pipe($.plumber(errorHandler))
-    .pipe(gulpif(! config.production, $.sourcemaps.init()))
-    .pipe($.babel({
-      presets: ['es2015']
-    }))
-    .pipe($.browserify({
-      insertGlobals: false,
-      debug: true,
-      paths: ['./node_modules', config.jsSrc]
-    }))
-    .pipe(gulpif(! config.production, $.sourcemaps.write()))
-    .pipe(gulpif(config.production, $.uglify()))
-    .pipe(gulp.dest(config.jsDist))
-    .pipe($.connect.reload());
-});
-
-/**
- * Copy some JS folders like vendor
+ * Copy the vendor JS folder to dist
  */
 
 gulp.task('copy-js', function() {
   return gulp.src(config.jsSrc + '/vendor/**/*')
     .pipe($.plumber(errorHandler))
+    .pipe(gulpif(config.production, $.uglify()))
     .pipe(gulp.dest(config.jsDist + '/vendor'));
+});
+
+/**
+ * Babel ES2015
+ */
+
+gulp.task('compile-js', function() {
+  /*glob.sync(config.jsDist + '/vendor/*').forEach(function(filePath) {
+    if (fs.statSync(filePath).isDirectory() === false) {
+      bundler.external(filePath);
+    }
+  });*/
+
+  return bundler.bundle()
+    .on('error', errorHandler)
+    .pipe(source('app.js'))
+    //.pipe($.plumber(errorHandler))
+    .pipe(buffer())
+    .pipe(gulpif(config.production, $.uglify()))
+    .pipe(gulp.dest(config.jsDist))
+    .pipe($.connect.reload());
 });
 
 /**
