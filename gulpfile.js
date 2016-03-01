@@ -6,6 +6,7 @@ var gulpif = require('gulp-if');
 var fs = require('fs');
 var $ = require('gulp-load-plugins')();
 var runSequence = require('run-sequence'); // Remove if Gulp 4.0 is released
+var nunjucks = require('gulp-nunjucks-html');
 
 /**
  * Gulp tasks config
@@ -80,7 +81,7 @@ gulp.task('watch', function() {
 gulp.task('compile-html', function() {
   return gulp.src(config.htmlSrc + '/*.*')
     .pipe($.plumber(errorHandler))
-    .pipe($.nunjucks.compile())
+    .pipe(nunjucks({ searchPaths: [config.htmlSrc] }))
     .pipe(gulp.dest(config.htmlDist))
     .pipe($.connect.reload());
 });
