@@ -7,7 +7,6 @@ var gulpif = require('gulp-if');
 var runSequence = require('run-sequence'); // Remove if Gulp 4.0 is released
 var fs = require('fs');
 var glob = require('glob');
-var merge = require('merge');
 var nunjucks = require('gulp-nunjucks-html');
 
 var browserify = require('browserify');
