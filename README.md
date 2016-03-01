@@ -24,7 +24,6 @@ Clone the repository with `git clone https://github.com/jesse-s/html-gulp-boiler
 * `gulp clean` - Clean out the whole dist folder
 
 ## Todo
-* `import` support for ES2015, or an alternative solution
-* Clean and optimize the gulpfile
+* JavaScript compilation performance tweaks
 * More advanced `gulp prod` task
 * Tests
