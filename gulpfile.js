@@ -181,7 +181,8 @@ gulp.task('optimize-images', function() {
           { removeUselessStrokeAndFill: false },
           { removeEmptyAttrs: false },
           { collapseGroups: false },
-          { moveElemsAttrsToGroup: false }
+          { moveElemsAttrsToGroup: false },
+          { moveGroupAttrsToElems: false }
         ]
     }))
     .pipe(gulp.dest(config.imgDist))
