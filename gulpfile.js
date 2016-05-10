@@ -39,7 +39,6 @@ var config = {
 
 var bundler = browserify({
   entries: [config.jsSrc + '/app.js'],
-  insertGlobals: true,
   debug: ! config.production,
   paths: ['./node_modules', config.jsSrc], //config.jsDist
   cache: {},
