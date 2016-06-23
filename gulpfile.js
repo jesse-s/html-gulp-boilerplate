@@ -77,7 +77,7 @@ gulp.task('server', function () {
  */
 
 gulp.task('watch', function() {
-  $.watch(config.htmlSrc + '/**/*.*', function() {
+  $.watch(config.htmlSrc + '/**/*.html', function() {
     gulp.start('compile-html');
   });
 
@@ -112,7 +112,7 @@ gulp.task('watch', function() {
  */
 
 gulp.task('compile-html', function() {
-  return gulp.src(config.htmlSrc + '/*.*')
+  return gulp.src(config.htmlSrc + '/**/*.html')
     .pipe($.plumber(errorHandler))
     .pipe(nunjucks({ searchPaths: [config.htmlSrc] }))
     .pipe(gulp.dest(config.htmlDist))
