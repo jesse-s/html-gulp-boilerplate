@@ -111,7 +111,7 @@ gulp.task('watch', () => {
 gulp.task('compile-html', () => {
   return gulp.src(config.htmlSrc + '/**/*.html')
     .pipe($.plumber(errorHandler))
-    .pipe(nunjucks({ searchPaths: [config.htmlSrc] }))
+    .pipe(nunjucks({ path: [config.htmlSrc] }))
     .pipe(gulp.dest(config.htmlDist))
     .pipe($.connect.reload());
 });
