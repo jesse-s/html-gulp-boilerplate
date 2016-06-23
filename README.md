@@ -2,7 +2,7 @@
 A workflow boilerplate to get started with modern front end development using Gulp.
 
 ## About
-This boilerplate offers a basic web server, HTML templating with Nunjucks, ES2015 support, SCSS support with autoprefixer, image optimization and automatic reloading using Gulp. `import` is currently unsupported for ES2015. Generated JS and CSS contain sourcemaps in development. The SCSS library Bourbon with Neat and (modified) Bitters is included and integrated by default.
+This boilerplate offers a basic web server, HTML templating with Nunjucks, ES2015 support, SCSS support with autoprefixer, image optimization and automatic reloading using Gulp. Generated JS and CSS contain sourcemaps in development. The SCSS library Bourbon with Neat and (modified) Bitters is included and integrated by default.
 
 A basic icon template for Sketch can be found in the `/resources` folder for the gazillion icons and images that are available to use on the web these days.
 
@@ -24,6 +24,5 @@ Clone the repository with `git clone https://github.com/jesse-s/html-gulp-boiler
 * `gulp clean` - Clean out the whole dist folder
 
 ## Todo
-* JavaScript compilation performance tweaks
 * More advanced `gulp prod` task
 * Tests
