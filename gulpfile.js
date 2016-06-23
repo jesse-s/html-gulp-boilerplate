@@ -227,6 +227,8 @@ gulp.task('checkinstall', () => {
   if (! fs.existsSync(config.cssDist)) {
     return gulp.start('dist');
   }
+
+  return;
 });
 
 /**
@@ -236,8 +238,9 @@ gulp.task('checkinstall', () => {
 gulp.task('dist', (callback) => {
   // Run tasks in parallel
   runSequence(
-    'clean', ['compile-html', 'compile-css', 'copy-js', 'copy-root', 'compile-js',
-    'optimize-images'], callback
+    'clean',
+    ['compile-html', 'compile-css', 'copy-js', 'copy-root', 'compile-js', 'optimize-images'],
+    callback
   );
 });
 
