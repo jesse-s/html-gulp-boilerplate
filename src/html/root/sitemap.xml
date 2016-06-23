@@ -6,7 +6,7 @@
     http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
   <url>
-    <loc>http://0.0.0.0:3000</loc>
+    <loc>http://0.0.0.0:8080</loc>
     <lastmod>2015-02-25T11:30:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
