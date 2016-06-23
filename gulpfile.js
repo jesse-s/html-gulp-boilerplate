@@ -1,25 +1,25 @@
 // Needed for autoprefixer to work
 require('es6-promise').polyfill();
 
-var gulp = require('gulp');
-var $ = require('gulp-load-plugins')();
-var gulpif = require('gulp-if');
-var runSequence = require('run-sequence'); // Remove if Gulp 4.0 is released
-var fs = require('fs');
-var glob = require('glob');
-var nunjucks = require('gulp-nunjucks-html');
+const gulp = require('gulp');
+const $ = require('gulp-load-plugins')();
+const gulpif = require('gulp-if');
+const runSequence = require('run-sequence'); // Remove if Gulp 4.0 is released
+const fs = require('fs');
+const glob = require('glob');
+const nunjucks = require('gulp-nunjucks-render');
 
-var browserify = require('browserify');
-var watchify = require('watchify');
-var babelify = require('babelify');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
+const browserify = require('browserify');
+const watchify = require('watchify');
+const babelify = require('babelify');
+const source = require('vinyl-source-stream');
+const buffer = require('vinyl-buffer');
 
 /**
  * Gulp tasks config
  */
 
-var config = {
+const config = {
   production: false,
   livereload: true,
   autoprefix: 'last 2 versions',
@@ -38,7 +38,7 @@ var config = {
  * Bundler init
  */
 
-var bundler = browserify({
+const bundler = browserify({
   entries: [config.jsSrc + '/app.js'],
   debug: ! config.production,
   paths: ['./node_modules', config.jsSrc], //config.jsDist
@@ -54,7 +54,7 @@ var bundler = browserify({
  * Global error handler for the Plumber plugin
  */
 
-var errorHandler = function(err) {
+const errorHandler = function(err) {
   $.notify().write(err);
   this.emit('end');
 };
@@ -63,7 +63,7 @@ var errorHandler = function(err) {
  * Connect webserver
  */
 
-gulp.task('server', function () {
+gulp.task('server', () => {
   $.connect.server({
     root: 'dist',
     host: '0.0.0.0',
@@ -76,33 +76,30 @@ gulp.task('server', function () {
  * Watch all project files and execute the relevant tasks
  */
 
-gulp.task('watch', function() {
-  $.watch(config.htmlSrc + '/**/*.html', function() {
+gulp.task('watch', () => {
+  $.watch(config.htmlSrc + '/**/*.html', () => {
     gulp.start('compile-html');
   });
 
-  $.watch(config.rootSrc + '/**/*.*', function() {
+  $.watch(config.rootSrc + '/**/*.*', () => {
     gulp.start('copy-root');
   });
 
-  $.watch(config.cssSrc + '/**/*.scss', function() {
+  $.watch(config.cssSrc + '/**/*.scss', () => {
     gulp.start('compile-css');
   });
 
-  $.watch(config.jsSrc + '/vendor/**/*', function() {
+  $.watch(config.jsSrc + '/vendor/**/*', () => {
     gulp.start('copy-js');
   });
 
-  //$.watch(config.jsSrc + '/app.js', function() {
-  //  gulp.start('compile-js');
-  //});
-  bundler.on('update', function() {
+  bundler.on('update', () => {
     gulp.start('compile-js');
   });
   // Start initial compilation or Watchify will not work
   gulp.start('compile-js');
 
-  $.watch(config.imgSrc + '/**/*.*', function() {
+  $.watch(config.imgSrc + '/**/*.*', () => {
     gulp.start('optimize-images');
   });
 });
@@ -111,7 +108,7 @@ gulp.task('watch', function() {
  * Templates using Nunjucks
  */
 
-gulp.task('compile-html', function() {
+gulp.task('compile-html', () => {
   return gulp.src(config.htmlSrc + '/**/*.html')
     .pipe($.plumber(errorHandler))
     .pipe(nunjucks({ searchPaths: [config.htmlSrc] }))
@@ -123,7 +120,7 @@ gulp.task('compile-html', function() {
  * Copy all files in the root folder to the dist root
  */
 
-gulp.task('copy-root', function() {
+gulp.task('copy-root', () => {
   return gulp.src(config.rootSrc + '/**/*')
     .pipe(gulp.dest(config.htmlDist));
 });
@@ -132,7 +129,7 @@ gulp.task('copy-root', function() {
  * SCSS and autoprefixer
  */
 
-gulp.task('compile-css', function() {
+gulp.task('compile-css', () => {
   return gulp.src(config.cssSrc + '/app.scss')
     .pipe($.plumber(errorHandler))
     .pipe(gulpif(! config.production, $.sourcemaps.init()))
@@ -148,7 +145,7 @@ gulp.task('compile-css', function() {
  * Copy the vendor JS folder to dist
  */
 
-gulp.task('copy-js', function() {
+gulp.task('copy-js', () => {
   return gulp.src(config.jsSrc + '/vendor/**/*')
     .pipe($.plumber(errorHandler))
     .pipe(gulpif(config.production, $.uglify()))
@@ -159,7 +156,7 @@ gulp.task('copy-js', function() {
  * Babel ES2015
  */
 
-gulp.task('compile-js', function() {
+gulp.task('compile-js', () => {
   /*glob.sync(config.jsDist + '/vendor/*').forEach(function(filePath) {
     if (fs.statSync(filePath).isDirectory() === false) {
       bundler.external(filePath);
@@ -180,7 +177,7 @@ gulp.task('compile-js', function() {
  * Image optimization
  */
 
-gulp.task('optimize-images', function() {
+gulp.task('optimize-images', () => {
   return gulp.src(config.imgSrc + '/**/*.*')
     .pipe($.plumber(errorHandler))
     .pipe($.imagemin({
@@ -206,7 +203,7 @@ gulp.task('optimize-images', function() {
  * Dist folder cleanup
  */
 
-gulp.task('clean', function() {
+gulp.task('clean', () => {
   return gulp.src('./dist/*', { read: false })
     .pipe($.plumber(errorHandler))
 		.pipe($.clean());
@@ -216,7 +213,7 @@ gulp.task('clean', function() {
  * Set files ready for production
  */
 
-gulp.task('prod', function() {
+gulp.task('prod', () => {
   config.production = true;
 
   return gulp.start('dist');
@@ -226,7 +223,7 @@ gulp.task('prod', function() {
  * Check if the dist folder is empty, and if so first run the 'dist' task to fill it
  */
 
-gulp.task('checkinstall', function() {
+gulp.task('checkinstall', () => {
   if (! fs.existsSync(config.cssDist)) {
     return gulp.start('dist');
   }
@@ -236,7 +233,7 @@ gulp.task('checkinstall', function() {
  * Compile and move all the stuff to dist
  */
 
-gulp.task('dist', function(callback) {
+gulp.task('dist', (callback) => {
   // Run tasks in parallel
   runSequence(
     'clean', ['compile-html', 'compile-css', 'copy-js', 'copy-root', 'compile-js',
