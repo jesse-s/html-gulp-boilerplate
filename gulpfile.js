@@ -24,6 +24,7 @@ var config = {
   livereload: true,
   autoprefix: 'last 2 versions',
   htmlSrc: './src/html',
+  rootSrc: './src/html/root',
   htmlDist: './dist',
   cssSrc: './src/sass',
   cssDist: './dist/css',
@@ -112,6 +113,15 @@ gulp.task('compile-html', function() {
     .pipe(nunjucks({ searchPaths: [config.htmlSrc] }))
     .pipe(gulp.dest(config.htmlDist))
     .pipe($.connect.reload());
+});
+
+/**
+ * Copy all files in the root folder to the dist root
+ */
+
+gulp.task('copy-root', function() {
+  return gulp.src(config.rootSrc + '/**/*')
+    .pipe(gulp.dest(config.htmlDist));
 });
 
 /**
@@ -225,7 +235,7 @@ gulp.task('checkinstall', function() {
 gulp.task('dist', function(callback) {
   // Run tasks in parallel
   runSequence(
-    'clean', ['compile-html', 'compile-css', 'copy-js', 'compile-js',
+    'clean', ['compile-html', 'compile-css', 'copy-js', 'copy-root', 'compile-js',
     'optimize-images'], callback
   );
 });
