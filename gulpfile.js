@@ -81,6 +81,10 @@ gulp.task('watch', function() {
     gulp.start('compile-html');
   });
 
+  $.watch(config.rootSrc + '/**/*.*', function() {
+    gulp.start('copy-root');
+  });
+
   $.watch(config.cssSrc + '/**/*.scss', function() {
     gulp.start('compile-css');
   });
