@@ -152,7 +152,7 @@ gulp.task('compile-css', () => {
 gulp.task('copy-js', () => {
   return gulp.src(config.jsSrc + '/vendor/**/*')
     .pipe($.plumber(errorHandler))
-    .pipe(gulpif(config.production, $.uglify()))
+    .pipe(gulpif(config.production, $.uglify({ preserveComments: 'license' })))
     .pipe(gulp.dest(config.jsDist + '/vendor'));
 });
 
