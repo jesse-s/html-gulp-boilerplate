@@ -172,7 +172,12 @@ gulp.task('compile-js', () => {
     .pipe(source('app.js'))
     //.pipe($.plumber(errorHandler))
     .pipe(buffer())
-    .pipe(gulpif(config.production, $.uglify()))
+    .pipe(gulpif(config.production, $.uglify({
+      mangle: false,
+      compress: {
+        unused: false
+      }
+    })))
     .pipe(gulp.dest(config.jsDist))
     .pipe($.connect.reload());
 });
