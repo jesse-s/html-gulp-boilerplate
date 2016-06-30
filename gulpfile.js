@@ -125,7 +125,7 @@ gulp.task('compile-html', () => {
  */
 
 gulp.task('copy-root', () => {
-  return gulp.src(config.rootSrc + '/**/*')
+  return gulp.src(config.rootSrc + '/**/*', { dot: true })
     .pipe(gulp.dest(config.htmlDist));
 });
 
