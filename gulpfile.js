@@ -109,7 +109,11 @@ gulp.task('watch', () => {
  */
 
 gulp.task('compile-html', () => {
-  return gulp.src(config.htmlSrc + '/**/*.html')
+  return gulp.src([
+      config.htmlSrc + '/**/*.html',
+      '!' + config.htmlSrc + '/layouts/**/*.html',
+      '!' + config.htmlSrc + '/partials/**/*.html'
+    ])
     .pipe($.plumber(errorHandler))
     .pipe(nunjucks({ path: [config.htmlSrc] }))
     .pipe(gulp.dest(config.htmlDist))
